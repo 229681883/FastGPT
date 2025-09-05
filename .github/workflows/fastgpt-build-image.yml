@@ -20,7 +20,7 @@ jobs:
       matrix:
         sub_routes:
           - repo: fastgpt
-            base_url: ""
+            base_url: "/fastai"
           - repo: fastgpt-sub-route
             base_url: "/fastai"
           - repo: fastgpt-sub-route-gchat
