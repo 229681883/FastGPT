@@ -23,6 +23,7 @@ import { PerResourceTypeEnum } from '@fastgpt/global/support/permission/constant
 import { removeImageByPath } from '../../common/file/image/controller';
 import { mongoSessionRun } from '../../common/mongo/sessionRun';
 import { MongoAppLogKeys } from './logs/logkeysSchema';
+import { MongoChatItemResponse } from '../chat/chatItemResponseSchema';
 
 export const beforeUpdateAppFormat = ({ nodes }: { nodes?: StoreNodeItemType[] }) => {
   if (!nodes) return;
@@ -157,23 +158,21 @@ export const onDelOneApp = async ({
   ).lean();
   await Promise.all(evalJobs.map((evalJob) => removeEvaluationJob(evalJob._id)));
 
+  // Delete chats
+  await deleteChatFiles({ appId });
+  await MongoChatItemResponse.deleteMany({
+    appId
+  });
+  await MongoChatItem.deleteMany({
+    appId
+  });
+  await MongoChat.deleteMany({
+    appId
+  });
+
   const del = async (session: ClientSession) => {
     for await (const app of apps) {
       const appId = app._id;
-      // Chats
-      await deleteChatFiles({ appId });
-      await MongoChatItem.deleteMany(
-        {
-          appId
-        },
-        { session }
-      );
-      await MongoChat.deleteMany(
-        {
-          appId
-        },
-        { session }
-      );
 
       // 删除分享链接
       await MongoOutLink.deleteMany({
@@ -205,6 +204,7 @@ export const onDelOneApp = async ({
         { $pull: { quickAppIds: { id: String(appId) } } }
       ).session(session);
 
+      // Del permission
       await MongoResourcePermission.deleteMany({
         resourceType: PerResourceTypeEnum.app,
         teamId,

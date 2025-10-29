@@ -8,7 +8,7 @@ import {
 import { MongoTeamMember } from './teamMemberSchema';
 import { MongoTeam } from './teamSchema';
 import { type UpdateTeamProps } from '@fastgpt/global/support/user/team/controller';
-import { getResourcePermission } from '../../permission/controller';
+import { getTmbPermission } from '../../permission/controller';
 import { PerResourceTypeEnum } from '@fastgpt/global/support/permission/constant';
 import { TeamPermission } from '@fastgpt/global/support/permission/user/controller';
 import { TeamDefaultRoleVal } from '@fastgpt/global/support/permission/user/constant';
@@ -17,7 +17,7 @@ import { mongoSessionRun } from '../../../common/mongo/sessionRun';
 import { DefaultGroupName } from '@fastgpt/global/support/user/team/group/constant';
 import { getAIApi } from '../../../core/ai/config';
 import { createRootOrg } from '../../permission/org/controllers';
-import { refreshSourceAvatar } from '../../../common/file/image/controller';
+import { getS3AvatarSource } from '../../../common/s3/sources/avatar';
 
 async function getTeamMember(match: Record<string, any>): Promise<TeamTmbItemType> {
   const tmb = await MongoTeamMember.findOne(match).populate<{ team: TeamSchema }>('team').lean();
@@ -26,7 +26,7 @@ async function getTeamMember(match: Record<string, any>): Promise<TeamTmbItemTyp
   }
 
   const role =
-    (await getResourcePermission({
+    (await getTmbPermission({
       resourceType: PerResourceTypeEnum.team,
       teamId: tmb.teamId,
       tmbId: tmb._id
@@ -244,7 +244,7 @@ export async function updateTeam({
         { session }
       );
 
-      await refreshSourceAvatar(avatar, team?.avatar, session);
+      await getS3AvatarSource().refreshAvatar(avatar, team?.avatar, session);
     }
   });
 }

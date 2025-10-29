@@ -24,7 +24,7 @@ import { ChatItemContext } from '@/web/core/chat/context/chatItemContext';
 import { ChatRecordContext } from '@/web/core/chat/context/chatRecordContext';
 import { useCreation } from 'ahooks';
 import type { ChatTypeEnum } from './constants';
-import type { QuickAppType } from '@fastgpt/global/core/chat/setting/type';
+import type { ChatQuickAppType } from '@fastgpt/global/core/chat/setting/type';
 
 export type ChatProviderProps = {
   appId: string;
@@ -39,14 +39,13 @@ export type ChatProviderProps = {
   slogan?: string;
 
   currentQuickAppId?: string;
-  quickAppList?: QuickAppType[];
+  quickAppList?: ChatQuickAppType[];
   onSwitchQuickApp?: (appId: string) => Promise<void>;
 };
 
 type useChatStoreType = ChatProviderProps & {
   welcomeText: string;
   variableList: VariableItemType[];
-  allVariableList: VariableItemType[];
   questionGuide: AppQGConfigType;
   ttsConfig: AppTTSConfigType;
   whisperConfig: AppWhisperConfigType;
@@ -238,10 +237,7 @@ const Provider = ({
   const value: useChatStoreType = {
     ...props,
     welcomeText,
-    variableList: variables.filter(
-      (item) => item.type !== VariableInputEnum.custom && item.type !== VariableInputEnum.internal
-    ),
-    allVariableList: variables,
+    variableList: variables,
     questionGuide,
     ttsConfig,
     fileSelectConfig,

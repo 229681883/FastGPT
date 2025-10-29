@@ -15,7 +15,6 @@ import { type ChatNodeUsageType } from '@fastgpt/global/support/wallet/bill/type
 import { MongoDataset } from '../../../dataset/schema';
 import { i18nT } from '../../../../../web/i18n/utils';
 import { filterDatasetsByTmbId } from '../../../dataset/utils';
-import { ModelTypeEnum } from '@fastgpt/global/core/ai/model';
 import { getDatasetSearchToolResponsePrompt } from '../../../../../global/core/ai/prompt/dataset';
 import { getNodeErrResponse } from '../utils';
 
@@ -53,6 +52,7 @@ export async function dispatchDatasetSearch(
   const {
     runningAppInfo: { teamId },
     runningUserInfo: { tmbId },
+    uid,
     histories,
     node,
     params: {
@@ -268,15 +268,18 @@ export async function dispatchDatasetSearch(
       },
       [DispatchNodeResponseKeyEnum.nodeResponse]: responseData,
       nodeDispatchUsages,
-      [DispatchNodeResponseKeyEnum.toolResponses]: {
-        prompt: getDatasetSearchToolResponsePrompt(),
-        cites: searchRes.map((item) => ({
-          id: item.id,
-          sourceName: item.sourceName,
-          updateTime: item.updateTime,
-          content: `${item.q}\n${item.a}`.trim()
-        }))
-      }
+      [DispatchNodeResponseKeyEnum.toolResponses]:
+        searchRes.length > 0
+          ? {
+              prompt: getDatasetSearchToolResponsePrompt(),
+              cites: searchRes.map((item) => ({
+                id: item.id,
+                sourceName: item.sourceName,
+                updateTime: item.updateTime,
+                content: `${item.q}\n${item.a}`.trim()
+              }))
+            }
+          : 'No results'
     };
   } catch (error) {
     return getNodeErrResponse({ error });

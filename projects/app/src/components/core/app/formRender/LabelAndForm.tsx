@@ -53,7 +53,7 @@ const LabelAndFormRender = ({
   return (
     <Box _notLast={{ mb: 4 }}>
       <Flex alignItems={'center'} mb={1}>
-        {typeof label === 'string' ? <FormLabel required={required}>{label}</FormLabel> : label}
+        {typeof label === 'string' ? <FormLabel required={required}>{t(label)}</FormLabel> : label}
         {placeholder && <QuestionTip ml={1} label={placeholder} />}
       </Flex>
 
@@ -62,7 +62,8 @@ const LabelAndFormRender = ({
         name={props.fieldName}
         rules={{
           validate: (value) => {
-            if (!required || inputType === InputTypeEnum.switch) return true;
+            if (!required) return true;
+            if (typeof value === 'number' || typeof value === 'boolean') return true;
             return !!value;
           },
           ...(!!props?.minLength
